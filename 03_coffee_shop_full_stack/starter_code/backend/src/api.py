@@ -96,6 +96,35 @@ def add_new_drink(payload):
         returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
             or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['PATCH'])
+@requires_auth('patch:drinks')
+def add_new_drink(payload, id):
+    body = request.get_json()
+    title = body.get('title', None)
+    recipe = body.get('recipe', None)
+
+    if title is None and recipe is None:
+        abort(400)
+
+    try:
+        drink = Drink.query.filter(Drink.id = id).one_or_none()
+
+        if drink is None:
+            abort(404)
+        if title is None:
+            drink.recipe = json.dumps(recipe)
+            drink.update()
+        elif recipe is None:
+            drink.title = title
+            drink.update()
+        else:
+            drink.title = title
+            drink.recipe = json.dumps(recipe)
+            drink.update()
+
+        return jsonify({"success": True, "drinks": [drink.long()]}), 200
+    except:
+        abort(422)
 
 '''
      @TODO implement endpoint
@@ -107,6 +136,32 @@ def add_new_drink(payload):
         returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
             or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def add_new_drink(payload, id):
+    try:
+        drink = Drink.query.filter(Drink.id = id).one_or_none()
+
+        if drink is None:
+            abort(404)
+
+        drink.delete()
+
+        return jsonify({"success": True, "delete": id}), 200
+    except:
+        abort(422)
+
+
+
+
+
+
+
+
+
+
+
+
 ## Error Handling
 '''
      Example error handling for unprocessable entity
